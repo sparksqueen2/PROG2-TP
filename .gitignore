@@ -1,0 +1,86 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Unity crash / backup
+sysinfo.txt
+/[Aa]ssets/_Recovery/
+*.stackdump
+
+# IDE / editor local state
+.vs/
+.vscode/
+.idea/
+.consulo/
+*.DotSettings.user
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Unity regenerates these on open
+*.csproj
+*.unityproj
+*.sln
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+ExportedObj/
+
+# Meta for debug symbols
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Builds & installers
+*.apk
+*.aab
+*.app
+*.exe
+*.unitypackage
+
+# Addressables cache
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Android / Gradle
+.gradle/
+/[Ll]ocalProperties/
+*.keystore
+!debug.keystore
+
+# JetBrains Rider plugin (auto-generated)
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# OS junk
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# OneDrive / sync noise
+~$*
+*.tmp
+*.lnk
+
+# Cursor local workspace (not project rules)
+.cursor/
+
+# Crashlytics
+crashlytics-build.properties
