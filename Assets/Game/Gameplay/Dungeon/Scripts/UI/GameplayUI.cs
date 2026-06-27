@@ -71,6 +71,11 @@ public class GameplayUI : MonoBehaviour
         winPanel.SetActive(true);
     }
 
+    public void ReturnToMenu()
+    {
+        BackToMenu();
+    }
+
     public void UpdatePlayerHealth(int currentLives, int maxLives)
     {
         if (playerHealthSlider == null || maxLives <= 0)

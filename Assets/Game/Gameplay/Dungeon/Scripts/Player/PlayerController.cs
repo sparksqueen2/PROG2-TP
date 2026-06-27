@@ -118,6 +118,11 @@ public class PlayerController : MonoBehaviour, IDamagable
         inputController.UpdateInputFSM(FSM_INPUT.ONLY_UI);
     }
 
+    public void EnableInput()
+    {
+        inputController.UpdateInputFSM(FSM_INPUT.ENABLE_ALL);
+    }
+
     public void PlayVictoryAnimation()
     {
         anim.Play("Victory");

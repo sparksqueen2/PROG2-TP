@@ -49,7 +49,7 @@ public class GameplayController : MonoBehaviour
             return;
         }
 
-        dungeonRunController.Init(winZone, gameplayUI, playerController.transform);
+        dungeonRunController.Init(winZone, gameplayUI, playerController);
         dungeonRunController.BeginDungeon();
 
         if (GameManager.Instance?.AudioManager != null)
@@ -140,10 +140,13 @@ public class GameplayController : MonoBehaviour
 
     private void WinGame()
     {
-        var winMessage = dungeonRunController != null
-            ? dungeonRunController.GetWinMessage()
-            : null;
-        gameplayUI.OpenWinPanel(winMessage);
+        if (dungeonRunController != null)
+        {
+            dungeonRunController.ShowWinScreen(() => gameplayUI?.ReturnToMenu());
+            return;
+        }
+
+        gameplayUI?.OpenWinPanel();
     }
 
     private void ToggleTimeScale(bool status)

@@ -131,7 +131,7 @@ public class PlayerInventoryController : MonoBehaviour
                     break;
 
                 case PlayerPart.Armor:
-                    playerMesh[index].GetComponent<SkinnedMeshRenderer>().sharedMesh = new Mesh();
+                    playerMesh[index].GetComponent<SkinnedMeshRenderer>().sharedMesh = playerDefaultMesh.armor;
                     break;
                 case PlayerPart.Gloves:
                     playerMesh[index].GetComponent<SkinnedMeshRenderer>().sharedMesh = playerDefaultMesh.gloves;
@@ -240,11 +240,32 @@ public class PlayerInventoryController : MonoBehaviour
         }
 
         if (newList.Count > 0)
+        {
             SetSaveSlots(newList);
+            NormalizePrimaryWeaponHandSlot();
+        }
 
         UpdateMesh();
         ApplyBaseCosmeticVisibility();
         panelInventory?.RefreshAllButtons();
+    }
+
+    private void NormalizePrimaryWeaponHandSlot()
+    {
+        var slots = equipment.GetEquipmentList();
+        if (slots.Count < 2 || slots[0].ID == -1 || slots[1].ID != -1)
+            return;
+
+        var item = ItemManager.Instance.GetItemFromID(slots[0].ID);
+        if (item is not Weapon weapon)
+            return;
+
+        if (weapon.type == WeaponType.Bow)
+            return;
+
+        slots[1] = new Slot(slots[0].ID, slots[0].amount);
+        slots[0].EmptySlot();
+        equipment.SetNewEquipment(slots);
     }
 
     private void ApplyBaseCosmeticVisibility()
@@ -254,10 +275,9 @@ public class PlayerInventoryController : MonoBehaviour
 
         var equipmentList = equipment.GetEquipmentList();
         var hasHelmet = equipmentList.Count > 4 && equipmentList[4].ID != -1;
-        var hasArmor = equipmentList.Count > 8 && equipmentList[8].ID != -1;
 
         SetNamedPartVisible(playerMeshTransform, "Helmet", hasHelmet);
-        SetNamedPartVisible(playerMeshTransform, "Armor", hasArmor);
+        SetNamedPartVisible(playerMeshTransform, "Armor", true);
     }
 
     private static void SetNamedPartVisible(Transform root, string partName, bool visible)

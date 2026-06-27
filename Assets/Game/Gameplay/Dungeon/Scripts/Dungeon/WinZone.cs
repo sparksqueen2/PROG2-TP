@@ -43,19 +43,13 @@ public class WinZone : MonoBehaviour
 
     private void ShowExitMarker()
     {
-        var marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        marker.name = "WinZoneMarker";
-        marker.transform.SetParent(transform, false);
-        marker.transform.localPosition = Vector3.zero;
-        marker.transform.localScale = new Vector3(3f, 6f, 3f);
+        if (transform.Find("PurifiedThreshold") != null)
+            return;
 
-        var renderer = marker.GetComponent<Renderer>();
-        if (renderer != null)
-            renderer.material.color = new Color(0.2f, 0.85f, 0.35f, 0.65f);
-
-        var markerCollider = marker.GetComponent<Collider>();
-        if (markerCollider != null)
-            Destroy(markerCollider);
+        var markerRoot = new GameObject("PurifiedThreshold");
+        markerRoot.transform.SetParent(transform, false);
+        markerRoot.transform.localPosition = Vector3.zero;
+        ThresholdVisual.Apply(markerRoot.transform);
     }
 
     private void OnTriggerEnter(Collider other)

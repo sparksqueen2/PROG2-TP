@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 
 public class DungeonRunController : MonoBehaviour
 {
     private struct SectionConfig
     {
-        public string Narrative;
-        public string Objective;
+        public string ChapterTitle;
+        public string ChapterBody;
+        public string HudHeader;
+        public string HudSubtitle;
+        public string ProgressLabel;
+        public string CompleteHeader;
         public string CompleteMessage;
         public Vector3[] GuardianSpawns;
         public Vector3[] OptionalSpawns;
@@ -27,9 +30,15 @@ public class DungeonRunController : MonoBehaviour
     {
         new SectionConfig
         {
-            Narrative = string.Empty,
-            Objective = "Derrotá a los guardianes corruptos",
-            CompleteMessage = "El camino está abierto",
+            ChapterTitle = "CAPITULO I\nEl Umbral Corrupto",
+            ChapterBody =
+                "Desterrado por portar un arma runica prohibida, Kael llega al primer umbral del bosque. " +
+                "La corrupcion bloquea el paso. Para avanzar, debera limpiar a sus guardianes.",
+            HudHeader = "UMBRAL SELLADO",
+            HudSubtitle = "Derrota a los guardianes corruptos",
+            ProgressLabel = "Guardianes",
+            CompleteHeader = "UMBRAL PURIFICADO",
+            CompleteMessage = "El camino empieza a abrirse.",
             GuardianSpawns = new[]
             {
                 new Vector3(-2f, 0f, -25f),
@@ -47,9 +56,15 @@ public class DungeonRunController : MonoBehaviour
         },
         new SectionConfig
         {
-            Narrative = "La cámara central aún respira magia rota.",
-            Objective = "Cámara: eliminá a los 2 guardianes.",
-            CompleteMessage = "El camino al núcleo queda abierto.",
+            ChapterTitle = "CAPITULO II\nLos Ecos del Destierro",
+            ChapterBody =
+                "El bosque recuerda lo que el reino quiso olvidar. Cada sombra repite la condena de Kael: " +
+                "traidor, exiliado, portador del hierro prohibido.",
+            HudHeader = "ECOS DEL DESTIERRO",
+            HudSubtitle = "Resiste la nueva oleada",
+            ProgressLabel = "Ecos derrotados",
+            CompleteHeader = string.Empty,
+            CompleteMessage = "Los ecos callan. Pero el juramento sigue intacto.",
             GuardianSpawns = new[]
             {
                 new Vector3(-0.1f, 0f, -10.5f),
@@ -67,9 +82,14 @@ public class DungeonRunController : MonoBehaviour
         },
         new SectionConfig
         {
-            Narrative = "El guardián custodia la grieta. La Guardia no quiso que llegues.",
-            Objective = "Grieta: derrotá a los 2 guardianes finales.",
-            CompleteMessage = "La grieta se estabiliza. Buscá el núcleo al norte.",
+            ChapterTitle = "CAPITULO III\nEl Juramento de Hierro",
+            ChapterBody =
+                "El ultimo umbral reconoce el arma de Kael. La corrupcion ya no intenta detenerlo: intenta reclamarlo.",
+            HudHeader = "JURAMENTO DE HIERRO",
+            HudSubtitle = "Rompe la ultima defensa del umbral",
+            ProgressLabel = "Guardianes",
+            CompleteHeader = "EL UMBRAL SE ABRE",
+            CompleteMessage = "La runa del juramento queda expuesta. Segui la luz al norte.",
             GuardianSpawns = new[]
             {
                 new Vector3(64f, 0f, -1f),
@@ -93,16 +113,14 @@ public class DungeonRunController : MonoBehaviour
     private const float DefaultLoseVisionRange = 5f;
     private const float EnemyWalkSpeed = 2.2f;
     private const float EnemyChaseSpeed = 3.4f;
-    private const string IntroTitle = "Kael y el Juramento de Hierro";
-    private const string IntroChapter = "CAPÍTULO I\nEl Umbral Corrupto";
-    private const string IntroBody =
-        "Desterrado por portar un arma rúnica prohibida,\n" +
-        "Kael debe limpiar la corrupción para abrir el camino.";
-    private const string ThresholdSealedHeader = "UMBRAL SELLADO";
-    private const string ThresholdPurifiedHeader = "UMBRAL PURIFICADO";
-    private const string ExitObjective = "Entrá al núcleo (cilindro verde al norte).";
+    private const string ExitObjectiveHeader = "RUNA DEL JURAMENTO";
+    private const string ExitObjective =
+        "El sello ancestral responde al hierro de Kael. Cruza el circulo para cerrar la grieta.";
+    private const string WinScreenTitle = "LA GRIETA SE CIERRA";
+    private const string WinEpilogue = "El bosque queda atras. Pero el juramento todavia pesa.";
+    private const string WinScreenButton = "VOLVER AL MENU";
     private const string WinMessage =
-        "Cerraste la grieta.\nLas armas no eran malditas.\nLa Guardia mintió.";
+        "La corrupcion retrocede.\nLas armas nunca fueron malditas.\nLa Guardia mintio para ocultar su miedo.";
 
     [SerializeField] private float blockerSpanZ = 40f;
     [SerializeField] private float blockerSpanX = 55f;
@@ -113,6 +131,10 @@ public class DungeonRunController : MonoBehaviour
     [SerializeField] private GameObject chestMonsterPrefab;
     [SerializeField] private GameObject watcherPrefab;
     [SerializeField] private GameObject beholderPrefab;
+    [SerializeField] private ChapterScreenView chapterScreen;
+    [SerializeField] private ChapterScreenView chapterScreenPrefab;
+
+    private const string ChapterScreenPrefabPath = "Assets/Game/Gameplay/Dungeon/Prefabs/UI/ChapterScreen.prefab";
 
     private readonly List<DungeonRequiredEnemy> activeRequiredEnemies = new List<DungeonRequiredEnemy>();
     private readonly List<List<GameObject>> sectionBlockerGroups = new List<List<GameObject>>();
@@ -123,10 +145,13 @@ public class DungeonRunController : MonoBehaviour
     private WinZone winZone;
     private GameplayUI gameplayUI;
     private TextMeshProUGUI objectiveText;
-    private GameObject introPanel;
+    private PlayerController playerController;
+    private ChapterScreenView chapterScreenInstance;
     private int currentSection;
+    private int pendingSectionIndex = -1;
     private int totalRequiredInSection;
     private int optionalAliveInWave;
+    private int optionalCountAtWaveStart;
     private bool isRunActive;
     private bool canExit;
     private bool hasStarted;
@@ -141,12 +166,14 @@ public class DungeonRunController : MonoBehaviour
     {
         DisableLegacySceneEnemies();
         EnsureWavePrefabs();
+        EnsureChapterScreenPrefab();
     }
 
-    public void Init(WinZone zone, GameplayUI ui, Transform player)
+    public void Init(WinZone zone, GameplayUI ui, PlayerController player)
     {
         winZone = zone;
         gameplayUI = ui;
+        playerController = player;
     }
 
     public void BeginDungeon()
@@ -187,7 +214,7 @@ public class DungeonRunController : MonoBehaviour
             Debug.LogError($"[Dungeon] Error al iniciar oleada: {ex.Message}");
         }
 
-        ShowIntro();
+        ShowChapterScreen(0);
     }
 
     private void EnsureWavePrefabs()
@@ -243,8 +270,6 @@ public class DungeonRunController : MonoBehaviour
         RefreshSpawnGroups();
         ActivateSceneBlockers();
         CreateSectionBlockers();
-        BeginSection(0);
-        isRunActive = true;
     }
 
     private void EnsureWaveSpawnMarkersInScene()
@@ -394,6 +419,7 @@ public class DungeonRunController : MonoBehaviour
         totalRequiredInSection = GuardiansPerWave;
         PrepareCarryOver(section);
         SpawnWave(section, sectionIndex);
+        optionalCountAtWaveStart = optionalAliveInWave;
 
         RefreshObjectiveDisplay();
         Debug.Log($"[Dungeon] Sección {sectionIndex + 1}: {activeRequiredEnemies.Count} guardianes, {optionalAliveInWave} opcionales activos.");
@@ -802,7 +828,7 @@ public class DungeonRunController : MonoBehaviour
         if (carryOverOptionalEnemies.Count > 0)
             message += $"\n{carryOverOptionalEnemies.Count} enemigo(s) restante(s) pasan a la siguiente oleada.";
 
-        StartCoroutine(AdvanceSectionAfterDelay(message));
+        StartCoroutine(AdvanceSectionAfterDelay(Sections[currentSection].CompleteHeader, message));
     }
 
     private void CollectCarryOverForNextSection()
@@ -822,25 +848,41 @@ public class DungeonRunController : MonoBehaviour
         }
     }
 
-    private IEnumerator AdvanceSectionAfterDelay(string message)
+    private IEnumerator AdvanceSectionAfterDelay(string completeHeader, string completeMessage)
     {
         if (objectiveText != null)
         {
-            if (currentSection == 0)
-                SetThresholdHud(ThresholdPurifiedHeader, Sections[0].CompleteMessage, totalRequiredInSection, totalRequiredInSection);
-            else
-                objectiveText.text = message;
+            var guardiansDefeated = totalRequiredInSection - activeRequiredEnemies.Count;
+            var optionalDefeated = Mathf.Max(0, optionalCountAtWaveStart - optionalAliveInWave);
+            SetSectionHud(
+                Sections[currentSection],
+                guardiansDefeated,
+                totalRequiredInSection,
+                optionalDefeated,
+                optionalCountAtWaveStart,
+                completeHeader,
+                completeMessage);
         }
 
-        yield return new WaitForSeconds(sectionCompleteDelay);
-        BeginSection(currentSection + 1);
+        yield return new WaitForSecondsRealtime(sectionCompleteDelay);
+
+        var nextSection = currentSection + 1;
+        if (nextSection < Sections.Length)
+            ShowChapterScreen(nextSection);
+        else
+            UnlockExit();
     }
 
     private void UnlockExit()
     {
         canExit = true;
         winZone?.SetUnlocked(true);
-        SetObjectiveText(ExitObjective, string.Empty);
+
+        if (objectiveText != null)
+        {
+            objectiveText.text = $"{ExitObjectiveHeader}\n{ExitObjective}";
+            objectiveText.color = new Color(0.95f, 0.88f, 0.62f, 1f);
+        }
     }
 
     private void RefreshObjectiveDisplay()
@@ -849,25 +891,33 @@ public class DungeonRunController : MonoBehaviour
             return;
 
         var section = Sections[currentSection];
-        var defeated = totalRequiredInSection - activeRequiredEnemies.Count;
-
-        if (currentSection == 0)
-        {
-            SetThresholdHud(ThresholdSealedHeader, section.Objective, defeated, totalRequiredInSection);
-            return;
-        }
-
-        var progress = $"Guardianes: {defeated}/{totalRequiredInSection}";
-        SetObjectiveText(section.Objective, progress, section.Narrative);
+        var guardiansDefeated = totalRequiredInSection - activeRequiredEnemies.Count;
+        var optionalDefeated = Mathf.Max(0, optionalCountAtWaveStart - optionalAliveInWave);
+        SetSectionHud(section, guardiansDefeated, totalRequiredInSection, optionalDefeated, optionalCountAtWaveStart);
     }
 
-    private void SetThresholdHud(string header, string subtitle, int defeated, int total)
+    private void SetSectionHud(SectionConfig section, int guardiansDefeated, int guardianTotal, int optionalDefeated,
+        int optionalTotal, string overrideHeader = null, string overrideSubtitle = null)
     {
         if (objectiveText == null)
             return;
 
-        objectiveText.text = $"{header}\n{subtitle}\n<size=22>Guardianes: {defeated}/{total}</size>";
-        objectiveText.color = defeated >= total
+        var header = string.IsNullOrWhiteSpace(overrideHeader) ? section.HudHeader : overrideHeader;
+        var subtitle = string.IsNullOrWhiteSpace(overrideSubtitle) ? section.HudSubtitle : overrideSubtitle;
+        var progress =
+            $"<size=22>Guardianes: {guardiansDefeated}/{guardianTotal}\nEcos del bosque: {optionalDefeated}/{optionalTotal}</size>";
+
+        if (guardiansDefeated >= guardianTotal && !string.IsNullOrWhiteSpace(overrideSubtitle))
+        {
+            objectiveText.text = string.IsNullOrWhiteSpace(header)
+                ? overrideSubtitle
+                : $"{header}\n{overrideSubtitle}";
+            objectiveText.color = new Color(0.82f, 0.9f, 0.78f, 1f);
+            return;
+        }
+
+        objectiveText.text = $"{header}\n{subtitle}\n{progress}";
+        objectiveText.color = guardiansDefeated >= guardianTotal
             ? new Color(0.82f, 0.9f, 0.78f, 1f)
             : new Color(0.9f, 0.86f, 0.95f, 1f);
     }
@@ -890,7 +940,7 @@ public class DungeonRunController : MonoBehaviour
         rect.anchorMax = new Vector2(0.5f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
         rect.anchoredPosition = new Vector2(0f, -16f);
-        rect.sizeDelta = new Vector2(920f, 110f);
+        rect.sizeDelta = new Vector2(920f, 140f);
 
         objectiveText = objectiveRoot.AddComponent<TextMeshProUGUI>();
         objectiveText.alignment = TextAlignmentOptions.Center;
@@ -930,78 +980,106 @@ public class DungeonRunController : MonoBehaviour
         objectiveText.color = new Color(0.9f, 0.86f, 0.95f, 1f);
     }
 
-    private void ShowIntro()
+    private void ShowChapterScreen(int sectionIndex)
     {
-        var canvas = gameplayUI != null ? gameplayUI.GetComponent<RectTransform>() : null;
-        if (canvas == null)
+        if (sectionIndex < 0 || sectionIndex >= Sections.Length)
             return;
 
-        introPanel = new GameObject("IntroPanel", typeof(RectTransform), typeof(Image));
-        introPanel.transform.SetParent(canvas, false);
+        pendingSectionIndex = sectionIndex;
+        PauseForChapterScreen(true);
 
-        var background = introPanel.GetComponent<Image>();
-        background.color = new Color(0f, 0f, 0f, 0.82f);
+        var screen = GetChapterScreenInstance();
+        if (screen == null)
+        {
+            Debug.LogError("[Dungeon] No hay ChapterScreen asignado. Creá el prefab con Game > UI > Crear Prefab ChapterScreen.");
+            BeginChapterSection();
+            return;
+        }
 
-        var panelRect = introPanel.GetComponent<RectTransform>();
-        panelRect.anchorMin = Vector2.zero;
-        panelRect.anchorMax = Vector2.one;
-        panelRect.offsetMin = Vector2.zero;
-        panelRect.offsetMax = Vector2.zero;
-
-        CreateIntroText(introPanel.transform, IntroTitle, 24f, new Vector2(0f, 190f), FontStyles.Italic,
-            new Color(0.72f, 0.7f, 0.78f, 1f));
-        CreateIntroText(introPanel.transform, IntroChapter, 38f, new Vector2(0f, 70f), FontStyles.Bold,
-            new Color(0.95f, 0.9f, 0.82f, 1f));
-        CreateIntroText(introPanel.transform, IntroBody, 24f, new Vector2(0f, -40f), FontStyles.Normal,
-            new Color(0.86f, 0.84f, 0.9f, 1f));
-
-        var buttonRoot = new GameObject("ContinueButton", typeof(RectTransform), typeof(Image), typeof(Button));
-        buttonRoot.transform.SetParent(introPanel.transform, false);
-
-        var buttonRect = buttonRoot.GetComponent<RectTransform>();
-        buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
-        buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
-        buttonRect.anchoredPosition = new Vector2(0f, -190f);
-        buttonRect.sizeDelta = new Vector2(300f, 58f);
-
-        buttonRoot.GetComponent<Image>().color = new Color(0.1f, 0.09f, 0.14f, 0.88f);
-
-        var buttonLabel = CreateIntroText(buttonRoot.transform, "COMENZAR", 22f, Vector2.zero, FontStyles.Bold,
-            new Color(0.88f, 0.82f, 0.95f, 1f));
-        buttonLabel.raycastTarget = false;
-
-        buttonRoot.GetComponent<Button>().onClick.AddListener(CloseIntro);
-        RefreshObjectiveDisplay();
+        var section = Sections[sectionIndex];
+        screen.Show(section.ChapterTitle, section.ChapterBody, BeginChapterSection);
     }
 
-    private TextMeshProUGUI CreateIntroText(Transform parent, string text, float fontSize, Vector2 position, FontStyles style,
-        Color color)
+    private ChapterScreenView GetChapterScreenInstance()
     {
-        var textObject = new GameObject("Text", typeof(RectTransform));
-        textObject.transform.SetParent(parent, false);
+        if (chapterScreen != null)
+            return chapterScreen;
 
-        var rect = textObject.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = position;
-        rect.sizeDelta = new Vector2(900f, 220f);
+        if (chapterScreenInstance != null)
+            return chapterScreenInstance;
 
-        var label = textObject.AddComponent<TextMeshProUGUI>();
-        label.text = text;
-        label.fontSize = fontSize;
-        label.fontStyle = style;
-        label.alignment = TextAlignmentOptions.Center;
-        label.color = color;
-        ApplyHudFont(label);
-        return label;
+        if (chapterScreenPrefab != null)
+        {
+            var canvas = gameplayUI != null ? gameplayUI.GetComponent<RectTransform>() : null;
+            if (canvas == null)
+                return null;
+
+            chapterScreenInstance = Instantiate(chapterScreenPrefab, canvas);
+            chapterScreen = chapterScreenInstance;
+            return chapterScreenInstance;
+        }
+
+        chapterScreen = FindFirstObjectByType<ChapterScreenView>(FindObjectsInactive.Include);
+        return chapterScreen;
     }
 
-    private void CloseIntro()
+    private void EnsureChapterScreenPrefab()
     {
-        if (introPanel != null)
-            Destroy(introPanel);
+        if (chapterScreenPrefab != null)
+            return;
 
-        introPanel = null;
+#if UNITY_EDITOR
+        chapterScreenPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<ChapterScreenView>(ChapterScreenPrefabPath);
+#endif
+    }
+
+    private void BeginChapterSection()
+    {
+        PauseForChapterScreen(false);
+
+        if (pendingSectionIndex < 0)
+            return;
+
+        var sectionIndex = pendingSectionIndex;
+        pendingSectionIndex = -1;
+
+        if (!isRunActive)
+            isRunActive = true;
+
+        BeginSection(sectionIndex);
+    }
+
+    private void PauseForChapterScreen(bool pause)
+    {
+        Time.timeScale = pause ? 0f : 1f;
+
+        if (playerController == null)
+            playerController = FindFirstObjectByType<PlayerController>();
+
+        if (pause)
+            playerController?.DisableInput();
+        else
+            playerController?.EnableInput();
+    }
+
+    public void ShowWinScreen(System.Action onContinue)
+    {
+        PauseForChapterScreen(true);
+
+        var screen = GetChapterScreenInstance();
+        if (screen == null)
+        {
+            Debug.LogWarning("[Dungeon] No hay ChapterScreen para la victoria.");
+            onContinue?.Invoke();
+            return;
+        }
+
+        var body = $"{WinEpilogue}\n\n{WinMessage}";
+        screen.Show(WinScreenTitle, body, () =>
+        {
+            PauseForChapterScreen(false);
+            onContinue?.Invoke();
+        }, WinScreenButton);
     }
 
     public string GetWinMessage() => WinMessage;

@@ -255,10 +255,10 @@ MonoBehaviour:
   lerpTime: 0.3
   loreText: {fileID: 1903218196}
   loreQuotes:
-  - "Kael jur\xF3 lealtad. El reino respondi\xF3 con destierro."
-  - "Nadie recuerda al h\xE9roe. Todos recuerdan al exiliado."
-  - "Las ruinas a\xFAn susurran su nombre."
-  - "Algunas heridas no sangran: arden."
+  - Kael juro lealtad. El reino respondio con destierro.
+  - Nadie recuerda al heroe. Todos recuerdan al exiliado.
+  - Las ruinas aun susurran su nombre.
+  - 'Algunas heridas no sangran: arden.'
 --- !u!1 &921416652
 GameObject:
   m_ObjectHideFlags: 0

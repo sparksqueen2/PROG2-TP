@@ -13,9 +13,9 @@ public class LoadingUI : MonoBehaviour
 
     [SerializeField] private string[] loreQuotes =
     {
-        "Kael juró lealtad. El reino respondió con destierro.",
-        "Nadie recuerda al héroe. Todos recuerdan al exiliado.",
-        "Las ruinas aún susurran su nombre.",
+        "Kael juro lealtad. El reino respondio con destierro.",
+        "Nadie recuerda al heroe. Todos recuerdan al exiliado.",
+        "Las ruinas aun susurran su nombre.",
         "Algunas heridas no sangran: arden."
     };
 
