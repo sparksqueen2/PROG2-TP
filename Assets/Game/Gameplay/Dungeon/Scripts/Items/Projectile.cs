@@ -6,7 +6,7 @@ public class Projectile : Arms
     public override string ItemToString()
     {
         string text = base.ItemToString();
-        text += "\nType: Proyectile";
+        text += "\nTipo: Proyectil";
         return text;
     }
 }

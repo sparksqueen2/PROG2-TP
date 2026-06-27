@@ -23,6 +23,6 @@ public abstract class Item : ScriptableObject
 
     public virtual string ItemToString() 
     { 
-        return "Name: " + itemName + "\nLevel: " + level + "\nWeight: " + weight + "\nPrice: " + price;
+        return "Nombre: " + itemName + "\nNivel: " + level + "\nPeso: " + weight + "\nPrecio: " + price;
     }
 }

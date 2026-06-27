@@ -13,7 +13,7 @@ public class UiInventory : MonoBehaviour
     public Action RefreshAllButtonsEvent;
     public Sprite[] defaultSprites;
     private Inventory.SortType sortBy = Inventory.SortType.Type;
-    private string[] nameSortBy = { "By Type", "By Name", "By Level" };
+    private string[] nameSortBy = { "Por tipo", "Por nombre", "Por nivel" };
     public RectTransform sortBRect;
     public TMP_Dropdown sortBDrop;
     public Button prefaButtonSlot;
@@ -152,7 +152,7 @@ public class UiInventory : MonoBehaviour
         string text = myItem.ItemToString();
         if (myItem.maxStack > 1)
         {
-            text += "\nAmount: " + slot.amount;
+            text += "\nCantidad: " + slot.amount;
         }
         return text;
     }

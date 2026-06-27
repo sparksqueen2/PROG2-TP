@@ -9,7 +9,7 @@ public class Shield : Arms
     public override string ItemToString()
     {
         string text = base.ItemToString();
-        text += "\nType: Shield\nResistance: " + resistance;
+        text += "\nTipo: Escudo\nResistencia: " + resistance;
         return text;
     }
 }

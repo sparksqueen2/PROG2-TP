@@ -21,30 +21,17 @@ public class Outfit : Item
     public override string ItemToString()
     {
         string text = base.ItemToString();
-        string thisType;
-        switch (type)
+        string thisType = type switch
         {
-            case OutfitSlotPosition.Armor:
-                thisType = "Armor";
-                break;
-            case OutfitSlotPosition.Boots:
-                thisType = "Boots";
-                break;
-            case OutfitSlotPosition.Gloves:
-                thisType = "Gloves";
-                break;
-            case OutfitSlotPosition.Helmet:
-                thisType = "Helmet";
-                break;
-            case OutfitSlotPosition.Shoulder:
-                thisType = "Shoulder";
-                break;
-            default:
-                thisType = "------";
-                break;
-        }
+            OutfitSlotPosition.Armor => "Armadura",
+            OutfitSlotPosition.Boots => "Botas",
+            OutfitSlotPosition.Gloves => "Guantes",
+            OutfitSlotPosition.Helmet => "Casco",
+            OutfitSlotPosition.Shoulder => "Hombros",
+            _ => "------"
+        };
 
-        text += "\nType: " + thisType + "\nDefense: " + defense;
+        text += "\nTipo: " + thisType + "\nDefensa: " + defense;
 
         return text;
     }

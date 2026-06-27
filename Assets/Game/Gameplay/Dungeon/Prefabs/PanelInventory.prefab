@@ -467,16 +467,24 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'L-Mouse: Drag Item.
+  m_text: 'Click izq: arrastrar item.
 
-    R-Mouse: Remove-Equip.
+    Click der: equipar / quitar.
 
-    Ctrl + R-Mouse: Drop
-    Item.
+    Ctrl + click der: tirar item.
 
-    Shift + R-Mouse: Divide Stack.
+    Shift + click der: dividir stack.
 
-    Trash can: Delete Item'
+    Tacho: borrar item.
+
+
+    Space: atacar (mano derecha)
+
+    F: escudo / pocion (mano izquierda)
+
+    Q: cambiar set de armas
+
+    E: recoger item'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -998,17 +1006,17 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Weapon Equipment:
+  m_text: 'Equipamiento de armas:
 
 
-    (LEFT)                (RIGHT)
+    (IZQ)                (DER)
 
-    Sword                   
-    Bow
+    Espada                   
+    Arco
 
-    Wand ----Player---- Shield
+    Varita ----Jugador---- Escudo
 
-    Arrow                     Potion'
+    Flecha                     Pocion'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1440,7 +1448,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sort By
+  m_text: Ordenar por
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2736,11 +2744,11 @@ MonoBehaviour:
   m_Value: 0
   m_Options:
     m_Options:
-    - m_Text: Sort By
+    - m_Text: Por tipo
       m_Image: {fileID: 0}
-    - m_Text: Option B
+    - m_Text: Por nombre
       m_Image: {fileID: 0}
-    - m_Text: Option C
+    - m_Text: Por nivel
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:

@@ -51,12 +51,6 @@ public class PlayerInventoryController : MonoBehaviour
         equipment = GetComponent<Equipment>();
     }
 
-    private void OnDestroy()
-    {
-        if (HasEquippedWeapon(GetSaveSlots()))
-            SaveJson();
-    }
-
     public void Init()
     {
         panelInventory?.Init(inventory, equipment, uiMeshTransform, UpdateMesh, GetDropItemPosition);
@@ -228,17 +222,16 @@ public class PlayerInventoryController : MonoBehaviour
 
     public void LoadJson()
     {
-        string savedData = File.Exists(SaveFilePath) ? File.ReadAllText(SaveFilePath) : string.Empty;
-        List<Slot> newList = ParseSlots(savedData);
-
-        if (!HasEquippedWeapon(newList))
+        if (defaultInvetoryJson == null)
         {
-            if (defaultInvetoryJson != null)
-                newList = ParseSlots(defaultInvetoryJson.text);
-            else
-                Debug.LogWarning("No hay inventario guardado ni DefaultInventory asignado.");
+            Debug.LogWarning("No hay DefaultInventory asignado.");
+            return;
         }
 
+        if (File.Exists(SaveFilePath))
+            File.Delete(SaveFilePath);
+
+        var newList = ParseSlots(defaultInvetoryJson.text);
         if (newList.Count > 0)
         {
             SetSaveSlots(newList);

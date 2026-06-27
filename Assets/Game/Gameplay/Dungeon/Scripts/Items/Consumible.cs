@@ -9,7 +9,7 @@ public class Consumible : Arms
     public override string ItemToString()
     {
         string text = base.ItemToString();
-        text += "\nType: Consumable\nAmount: " + amount;
+        text += "\nTipo: Consumible\nCantidad: " + amount;
         return text;
     }
 }

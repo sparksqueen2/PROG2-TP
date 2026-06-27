@@ -15,7 +15,17 @@ public class Potion : Consumible
     public override string ItemToString()
     {
         string text = base.ItemToString();
-        text += "\nPotion Type: " + type;
+        text += "\nTipo de pocion: " + TranslatePotionType(type);
         return text;
+    }
+
+    private static string TranslatePotionType(POTION_TYPE potionType)
+    {
+        return potionType switch
+        {
+            POTION_TYPE.LIFE => "Vida",
+            POTION_TYPE.MANA => "Mana",
+            _ => potionType.ToString()
+        };
     }
 }
