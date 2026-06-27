@@ -8,16 +8,37 @@ public static class DungeonNavMeshSetup
 
     public static void Build()
     {
+        PrepareForestProps();
+
         var root = GetOrCreateWalkableRoot();
         var surface = root.GetComponent<NavMeshSurface>();
         if (surface == null)
             surface = root.AddComponent<NavMeshSurface>();
 
-        surface.collectObjects = CollectObjects.All;
+        var bounds = Object.FindFirstObjectByType<PlayableAreaBounds>(FindObjectsInactive.Include);
+
+        surface.collectObjects = CollectObjects.Volume;
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-        surface.layerMask = ~0;
+        surface.layerMask = ~ForestPropsLayer.Mask;
         surface.overrideTileSize = false;
         surface.overrideVoxelSize = false;
+
+        if (bounds != null)
+        {
+            bounds.CacheReferenceGroundY();
+            var centerX = (bounds.MinX + bounds.MaxX) * 0.5f;
+            var centerZ = (bounds.MinZ + bounds.MaxZ) * 0.5f;
+            surface.center = new Vector3(centerX, bounds.ReferenceGroundY + 6f, centerZ);
+            surface.size = new Vector3(
+                bounds.MaxX - bounds.MinX + 6f,
+                18f,
+                bounds.MaxZ - bounds.MinZ + 6f);
+        }
+        else
+        {
+            surface.center = new Vector3(21f, 3f, -17f);
+            surface.size = new Vector3(64f, 18f, 44f);
+        }
 
         surface.BuildNavMesh();
         WarpAllAgents();
@@ -56,6 +77,15 @@ public static class DungeonNavMeshSetup
         return agent.isOnNavMesh;
     }
 
+    private static void PrepareForestProps()
+    {
+        foreach (var filter in Object.FindObjectsByType<ForestPlayableZoneFilter>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            filter.ApplyPlayableFilter();
+
+        foreach (var forest in Object.FindObjectsByType<ForestPropCollider>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            forest.EnsureColliders();
+    }
+
     private static GameObject GetOrCreateWalkableRoot()
     {
         var existing = GameObject.Find(WalkableRootName);
@@ -85,10 +115,24 @@ public static class DungeonNavMeshSetup
         if (plane == null)
             return;
 
+        var bounds = Object.FindFirstObjectByType<PlayableAreaBounds>(FindObjectsInactive.Include);
+        if (bounds != null)
+        {
+            bounds.CacheReferenceGroundY();
+            plane.position = new Vector3(
+                (bounds.MinX + bounds.MaxX) * 0.5f,
+                bounds.ReferenceGroundY,
+                (bounds.MinZ + bounds.MaxZ) * 0.5f);
+            plane.localScale = new Vector3(
+                (bounds.MaxX - bounds.MinX) * 0.1f,
+                1f,
+                (bounds.MaxZ - bounds.MinZ) * 0.1f);
+            return;
+        }
+
         var spawn = Object.FindFirstObjectByType<PlayerSpawnPoint>(FindObjectsInactive.Include);
         var playerPos = spawn != null ? spawn.transform.position : new Vector3(7f, 0f, -27f);
         var center = new Vector3(playerPos.x + 5f, 0f, playerPos.z + 10f);
-
         var floorY = DungeonGroundSnap.GetGroundY(center);
         plane.position = new Vector3(center.x, floorY, center.z);
         plane.localScale = new Vector3(50f, 1f, 45f);

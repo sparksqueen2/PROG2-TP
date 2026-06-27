@@ -121,7 +121,7 @@ public class Enemy : MonoBehaviour
         {
             IDamagable recieveDamage = other.gameObject.GetComponent<IDamagable>();
             recieveDamage?.Damage(_currentDamageAmount);
-            //Debug.Log($"{gameObject.name} le hace daùo de {_currentDamageAmount} a {other.name}");
+            //Debug.Log($"{gameObject.name} le hace daÔøΩo de {_currentDamageAmount} a {other.name}");
             DidDamage();
         }
     }

@@ -84,7 +84,7 @@ public class GameplayController : MonoBehaviour
         if (character != null)
             character.enabled = false;
 
-        DungeonGroundSnap.TrySnapToGround(ref spawn);
+        DungeonGroundSnap.TrySnapToGround(ref spawn, spawn.y);
         playerRoot.position = spawn;
 
         if (!playerRoot.CompareTag("Player"))

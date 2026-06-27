@@ -300,6 +300,7 @@ public class DungeonRunController : MonoBehaviour
             if (blocker == null)
                 continue;
 
+            blocker.RefreshVisual();
             blocker.gameObject.SetActive(true);
         }
     }
@@ -331,7 +332,7 @@ public class DungeonRunController : MonoBehaviour
                         new Vector3(2f, blockerHeight, blockerSpanZ)));
                 }
 
-                if (section.BlockerNorthZ > 0f)
+                if (Mathf.Abs(section.BlockerNorthZ) > 0.01f)
                 {
                     group.Add(CreateBlockerWall(
                         $"SectionBlocker_North_{i + 1}",
@@ -354,6 +355,10 @@ public class DungeonRunController : MonoBehaviour
         blocker.isStatic = true;
 
         CorruptionVisual.ApplyToBlocker(blocker);
+
+        var rootRenderer = blocker.GetComponent<MeshRenderer>();
+        if (rootRenderer != null)
+            rootRenderer.enabled = false;
 
         return blocker;
     }
