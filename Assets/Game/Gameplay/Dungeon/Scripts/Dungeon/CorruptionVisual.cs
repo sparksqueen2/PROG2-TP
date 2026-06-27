@@ -177,7 +177,7 @@ public static class CorruptionVisual
 
     private static Material CloneBarrierMaterial(Color baseColor, Color emission)
     {
-        var template = Resources.Load<Material>(BlockerMaterialResourcePath);
+        var template = GetBlockerMaterial();
         if (template == null)
             return CreateCorruptionMaterial(baseColor, emission, transparent: true);
 
